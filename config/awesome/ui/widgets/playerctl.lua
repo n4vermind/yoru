@@ -4,7 +4,7 @@ local tbutton = require("ui.widgets.button.text")
 local ebutton = require("ui.widgets.button.elevated")
 local beautiful = require("beautiful")
 local general_playerctl_daemon = require("signal.playerctl")
-local animation = require("modules.animation")
+local rubato = require("modules.rubato")
 local setmetatable = setmetatable
 local math = math
 
@@ -125,10 +125,10 @@ function playerctl.play(icon_color, bg_color)
 		child = widget,
 	})
 
-	local play_pause_animation = animation:new({
-		duration = 0.125,
-		easing = animation.easing.linear,
-		update = function(self, pos)
+	local play_pause_animation = rubato.timed({
+		duration = 0.225,
+		easing = rubato.easing.linear,
+		subscribed = function(pos)
 			widget.draw = get_draw(pos, point_maker, icon_color)
 			widget:emit_signal("widget::redraw_needed")
 		end,
@@ -136,14 +136,14 @@ function playerctl.play(icon_color, bg_color)
 
 	playerctl_daemon:connect_signal("playback_status", function(self, playing)
 		if playing then
-			play_pause_animation:set(0)
+			play_pause_animation.target = 0
 		else
-			play_pause_animation:set(1)
+			play_pause_animation.target = 1
 		end
 	end)
 
 	playerctl_daemon:connect_signal("no_players", function(self)
-		play_pause_animation:set(1)
+		play_pause_animation.target = 1
 	end)
 
 	return button

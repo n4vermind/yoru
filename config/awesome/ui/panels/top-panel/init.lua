@@ -7,7 +7,7 @@ local dpi = xresources.apply_dpi
 local helpers = require("helpers")
 local widgets = require("ui.widgets")
 local wbutton = require("ui.widgets.button")
-local animation = require("modules.animation")
+local rubato = require("modules.rubato")
 
 --- Modern Top Panel
 --- ~~~~~~~~~~~~~~~~~~~
@@ -67,10 +67,14 @@ return function(s)
 						},
 					})
 
-					self.indicator_animation = animation:new({
-						duration = 0.125,
-						easing = animation.easing.linear,
-						update = function(self, pos)
+					self.indicator_animation = rubato.timed({
+						intro = 0.04,
+						outro = 0.04,
+						duration = 0.2,
+						rate = 30,
+						pos = 0,
+						easing = rubato.easing.linear,
+						subscribed = function(pos)
 							indicator.children[1].forced_width = pos
 						end,
 					})
@@ -79,13 +83,13 @@ return function(s)
 
 					if c3.selected then
 						self.widget.children[1].bg = beautiful.accent
-						self.indicator_animation:set(dpi(32))
+						self.indicator_animation.target = dpi(32)
 					elseif #c3:clients() == 0 then
 						self.widget.children[1].bg = beautiful.color8
-						self.indicator_animation:set(dpi(8))
+						self.indicator_animation.target = dpi(8)
 					else
 						self.widget.children[1].bg = beautiful.accent
-						self.indicator_animation:set(dpi(16))
+						self.indicator_animation.target = dpi(16)
 					end
 
 					--- Tag preview
@@ -103,13 +107,13 @@ return function(s)
 				update_callback = function(self, c3, _)
 					if c3.selected then
 						self.widget.children[1].bg = beautiful.accent
-						self.indicator_animation:set(dpi(32))
+						self.indicator_animation.target = dpi(32)
 					elseif #c3:clients() == 0 then
 						self.widget.children[1].bg = beautiful.color8
-						self.indicator_animation:set(dpi(8))
+						self.indicator_animation.target = dpi(8)
 					else
 						self.widget.children[1].bg = beautiful.accent
-						self.indicator_animation:set(dpi(16))
+						self.indicator_animation.target = dpi(16)
 					end
 				end,
 			},
@@ -153,10 +157,10 @@ return function(s)
 			},
 		})
 
-		local system_tray_animation = animation:new({
-			easing = animation.easing.linear,
+		local system_tray_animation = rubato.timed({
 			duration = 0.125,
-			update = function(self, pos)
+			easing = rubato.easing.linear,
+			subscribed = function(pos)
 				widget.width = pos
 			end,
 		})
@@ -168,11 +172,11 @@ return function(s)
 			size = 18,
 			text = "",
 			on_turn_on = function(self)
-				system_tray_animation:set(400)
+				system_tray_animation.target = 400
 				self:set_text("")
 			end,
 			on_turn_off = function(self)
-				system_tray_animation:set(0)
+				system_tray_animation.target = 0
 				self:set_text("")
 			end,
 		})
